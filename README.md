@@ -31,4 +31,9 @@ Run the command below to download project dependancies.
 go mod download go.mod go.sum
 ```
 
+That's it. You are ready to rock 'n roll. Run the command below and test the application
+```shell
+./linky
+```
+
 Goodluck with you coding!!!!
