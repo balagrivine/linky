@@ -3,13 +3,14 @@ package logic
 import (
 	"encoding/json"
 	"fmt"
-	"http"
+	"net/http"
 	"time"
 	"database/sql"
 
 	"github.com/go-playground/validator/v10"
 
 	"github.com/balagrivine/linky/utils"
+	"github.com/balagrivine/linky/config"
 	"github.com/balagrivine/linky/internal/database"
 )
 
@@ -17,7 +18,7 @@ type createUser struct {
 	Email string `json:"email" validate:"required"`
 }
 
-func handleCreateUser(dbCfg *config.DBConfig) http.HandlerFunc {
+func HandleCreateUser(dbCfg *config.DBConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		decoder := json.NewDecoder(r.Body)
 		var param createUser
@@ -31,17 +32,17 @@ func handleCreateUser(dbCfg *config.DBConfig) http.HandlerFunc {
 
 		validate := validator.New()
 
-		err := validate.Struct(param)
+		err = validate.Struct(param)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Validation failed: %s", err), http.StatusBadRequest)
 			return
 		}
 
 		user, err := dbCfg.DB.CreateUser(r.Context(), database.CreateUserParams{
-			Email: param.Email
+			Email: param.Email,
 		})
 		if err != nil {
-			http.Error(w, fmt.Sprintf("Error creating user: %s", err), http.InternalServerError)
+			http.Error(w, fmt.Sprintf("Error creating user: %s", err), http.StatusInternalServerError)
 			return
 		}
 
@@ -51,13 +52,14 @@ func handleCreateUser(dbCfg *config.DBConfig) http.HandlerFunc {
 
 type createURL struct {
 	OriginalURL  string `json:"original_url" validate:"required"`
+	UserID       int32  `json:"user_id" validate:"required"`
 	CreatedAt    string `json:"created_at" validate:"required"`
 }
 
 func CreateShortURL(apiCfg *config.DBConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request){
 		decoder := json.NewDecoder(r.Body)
-		var param CreateURL
+		var param createURL
 
 		// Decode the request body into the param variable
 		err := decoder.Decode(&param)
@@ -69,7 +71,7 @@ func CreateShortURL(apiCfg *config.DBConfig) http.HandlerFunc {
 		// Create a new validator instance
 		validate := validator.New()
 
-		err := validate.Struct(param)
+		err = validate.Struct(param)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Validation failed: %s", err), http.StatusBadRequest)
 			return
@@ -84,6 +86,7 @@ func CreateShortURL(apiCfg *config.DBConfig) http.HandlerFunc {
 		url, err := apiCfg.DB.CreateURL(r.Context(), database.CreateURLParams {
 			OriginalUrl:  param.OriginalURL,
 			ShortUrl:     "",
+			UserID:       param.UserID,
 			CreatedAt:    nullTime,
 		})
 		if err != nil {
@@ -91,17 +94,17 @@ func CreateShortURL(apiCfg *config.DBConfig) http.HandlerFunc {
 			return
 		}
 
-		url_id := url.id
+		url_id := url.UrlID
 		// Hash the url id
 		hashed_id := utils.HashURLId(url_id)
 		// Encode the url id
 		encoded_url, err := utils.EncodeURL(hashed_id)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("Error encoding ID: %s", err) http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf("Error encoding ID: %s", err), http.StatusInternalServerError)
 			return
 		}
 
-		url.short_url := fmt.Sprintf("http://localhost/%s", encoded_url)
+		url.ShortUrl = fmt.Sprintf("http://localhost/%s", encoded_url)
 
 		json.NewEncoder(w).Encode(url)
 	}

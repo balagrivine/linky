@@ -1,6 +1,6 @@
 -- name: CreateUser :one
-INSERT INTO users("user_id", "email") VALUES($1, $2)
-RETURNING user_id, email;
+INSERT INTO users("email") VALUES($1)
+RETURNING email;
 
 -- name: CreateURL :one
 INSERT INTO urls("url_id", "original_url", "short_url", "user_id", "created_at") VALUES($1, $2, $3, $4, $5)

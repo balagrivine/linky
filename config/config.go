@@ -28,7 +28,7 @@ func InitConfig() (*DBConfig ,error) {
 		return nil, err
 	}
 
-	if err = Ping(conn); err != nil {
+	if err = conn.Ping(); err != nil {
 		return nil, err
 	}
 

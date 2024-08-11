@@ -2,11 +2,11 @@ package utils
 
 import (
 	"crypto/sha256"
-	b62 "encoding/base62"
+	b64 "encoding/base64"
 )
 
 // Helper function to hash URL id
-func HashURLId(url_id int) (string) {
+func HashURLId(url_id int32) (string) {
 	
 	// Convert id to string to enable hashing
 	id := string(url_id)
@@ -16,16 +16,13 @@ func HashURLId(url_id int) (string) {
 	hash.Write([]byte(id))
 	hashed_string := hash.Sum(nil)
 
-	return hashed_string
+	return string(hashed_string)
 }
 
 // Helper function to encode the hashed URL id
 func EncodeURL(hashed_url string) (string, error) {
 
-	encoded_url, err := b62.URLEncoding.EncodeToString([]byte(data))
-	if err != nil {
-		return "", err
-	}
+	encoded_url := b64.URLEncoding.EncodeToString([]byte(hashed_url))
 
 	return encoded_url, nil
 }
@@ -33,9 +30,9 @@ func EncodeURL(hashed_url string) (string, error) {
 // Helper function to decode the encoded url
 func DecodeURL(encoded_url string) (string, error) {
 
-	decoded_string, err := b62.URLDecoding.DecodeString(encoded_url)
+	decoded_url, err := b64.URLEncoding.DecodeString(encoded_url)
 	if err != nil {
-		return "", err
+		return "", nil
 	}
 
 	return string(decoded_url), nil

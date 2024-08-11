@@ -1,8 +1,8 @@
 -- +goose Up
 CREATE TABLE users (
-	user_id SERIAL NOT NULL,
-	email VARCHAR(255) NOT NULL,
-	PRIMARY KEY(user_id)
+	user_id SERIAL PRIMARY KEY,
+	email VARCHAR(255) NOT NULL
 );
 
 -- +goose Down
+DROP TABLE users;
