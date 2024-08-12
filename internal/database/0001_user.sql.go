@@ -43,14 +43,20 @@ func (q *Queries) CreateURL(ctx context.Context, arg CreateURLParams) (Url, erro
 }
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users("email") VALUES($1)
-RETURNING email
+INSERT INTO users("user_id", "email") VALUES($1, $2)
+RETURNING user_id, email
 `
 
-func (q *Queries) CreateUser(ctx context.Context, email string) (string, error) {
-	row := q.db.QueryRowContext(ctx, createUser, email)
-	err := row.Scan(&email)
-	return email, err
+type CreateUserParams struct {
+	UserID int32
+	Email  string
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, createUser, arg.UserID, arg.Email)
+	var i User
+	err := row.Scan(&i.UserID, &i.Email)
+	return i, err
 }
 
 const getOriginalURL = `-- name: GetOriginalURL :one

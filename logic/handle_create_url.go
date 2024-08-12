@@ -15,7 +15,8 @@ import (
 )
 
 type createUser struct {
-	Email string `json:"email" validate:"required"`
+	UserID int32    `json:"user_id" validate:"required"`
+	Email  string `json:"email" validate:"required"`
 }
 
 func HandleCreateUser(dbCfg *config.DBConfig) http.HandlerFunc {
@@ -39,7 +40,8 @@ func HandleCreateUser(dbCfg *config.DBConfig) http.HandlerFunc {
 		}
 
 		user, err := dbCfg.DB.CreateUser(r.Context(), database.CreateUserParams{
-			Email: param.Email,
+			UserID: param.UserID,
+			Email:  param.Email,
 		})
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Error creating user: %s", err), http.StatusInternalServerError)
@@ -51,9 +53,9 @@ func HandleCreateUser(dbCfg *config.DBConfig) http.HandlerFunc {
 }
 
 type createURL struct {
-	OriginalURL  string `json:"original_url" validate:"required"`
-	UserID       int32  `json:"user_id" validate:"required"`
-	CreatedAt    string `json:"created_at" validate:"required"`
+	UrlID        int32    `json:"id" validate:"required"`
+	OriginalURL  string   `json:"original_url" validate:"required"`
+	UserID       int32    `json:"user_id" validate:"required"`
 }
 
 func CreateShortURL(apiCfg *config.DBConfig) http.HandlerFunc {
@@ -84,6 +86,7 @@ func CreateShortURL(apiCfg *config.DBConfig) http.HandlerFunc {
 		}
 
 		url, err := apiCfg.DB.CreateURL(r.Context(), database.CreateURLParams {
+			UrlID:        param.UrlID,
 			OriginalUrl:  param.OriginalURL,
 			ShortUrl:     "",
 			UserID:       param.UserID,

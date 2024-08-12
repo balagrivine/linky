@@ -1,7 +1,7 @@
 -- +goose Up
 
 CREATE TABLE urls (
-	url_id SERIAL PRIMARY KEY,
+	url_id INT PRIMARY KEY,
 	original_url VARCHAR(255) NOT NULL,
 	short_url VARCHAR(255) NOT NULL,
 	user_id INT NOT NULL,

@@ -27,6 +27,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("POST /api/v1/users", logic.HandleCreateUser(dbCfg))
+	mux.HandleFunc("POST /api/v1/urls", logic.CreateShortURL(dbCfg))
 
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }
